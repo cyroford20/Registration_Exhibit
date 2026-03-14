@@ -18,12 +18,50 @@ function respond(int $status, array $payload): void
     exit;
 }
 
+function columnExists(mysqli $conn, string $table, string $column): bool
+{
+    $tableEscaped = $conn->real_escape_string($table);
+    $columnEscaped = $conn->real_escape_string($column);
+    $result = $conn->query("SHOW COLUMNS FROM `{$tableEscaped}` LIKE '{$columnEscaped}'");
+    if (!$result) {
+        return false;
+    }
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+}
+
+function ensureSpinHistoryColumns(mysqli $conn): void
+{
+    if (!columnExists($conn, 'users', 'spin')) {
+        $ok = $conn->query("ALTER TABLE users ADD COLUMN spin ENUM('yes','no') DEFAULT 'no'");
+        if (!$ok) {
+            throw new RuntimeException('Failed to add spin column: ' . $conn->error);
+        }
+    }
+
+    if (!columnExists($conn, 'users', 'prizeGet')) {
+        $ok = $conn->query("ALTER TABLE users ADD COLUMN prizeGet VARCHAR(255) NULL");
+        if (!$ok) {
+            throw new RuntimeException('Failed to add prizeGet column: ' . $conn->error);
+        }
+    }
+
+    if (!columnExists($conn, 'users', 'updated_at')) {
+        $ok = $conn->query("ALTER TABLE users ADD COLUMN updated_at DATETIME NULL");
+        if (!$ok) {
+            throw new RuntimeException('Failed to add updated_at column: ' . $conn->error);
+        }
+    }
+}
+
 // GET: retrieve all users
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     try {
         $conn = getDBConnection();
+        ensureSpinHistoryColumns($conn);
 
-        $query = "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at 
+        $query = "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at, spin, prizeGet 
                   FROM users ORDER BY registered_at DESC";
 
         $result = $conn->query($query);
@@ -43,7 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'college' => $row['college'],
                 'campus' => $row['campus'],
                 'role' => $row['role'],
-                'registered_at' => $row['registered_at']
+                'registered_at' => $row['registered_at'],
+                'spin' => $row['spin'] ?? 'no',
+                'prizeGet' => $row['prizeGet'] ?? null
             ];
         }
 
@@ -83,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $conn = getDBConnection();
+        ensureSpinHistoryColumns($conn);
 
         // Check for duplicate email
         $checkStmt = $conn->prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?)");
@@ -125,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Retrieve all users for response
         $selectStmt = $conn->prepare(
-            "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at 
+            "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at, spin, prizeGet 
              FROM users ORDER BY registered_at DESC"
         );
 
@@ -147,7 +188,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'college' => $row['college'],
                 'campus' => $row['campus'],
                 'role' => $row['role'],
-                'registered_at' => $row['registered_at']
+                'registered_at' => $row['registered_at'],
+                'spin' => $row['spin'] ?? 'no',
+                'prizeGet' => $row['prizeGet'] ?? null
             ];
         }
 
@@ -175,6 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         }
 
         $conn = getDBConnection();
+        ensureSpinHistoryColumns($conn);
 
         // Delete user
         $deleteStmt = $conn->prepare("DELETE FROM users WHERE id = ?");
@@ -200,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
 
         // Retrieve remaining users
         $selectStmt = $conn->prepare(
-            "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at 
+            "SELECT id, user_id, fullname, email, gender, college, campus, role, registered_at, spin, prizeGet 
              FROM users ORDER BY registered_at DESC"
         );
 
@@ -222,7 +266,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                 'college' => $row['college'],
                 'campus' => $row['campus'],
                 'role' => $row['role'],
-                'registered_at' => $row['registered_at']
+                'registered_at' => $row['registered_at'],
+                'spin' => $row['spin'] ?? 'no',
+                'prizeGet' => $row['prizeGet'] ?? null
             ];
         }
 
@@ -234,6 +280,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
             'message' => 'User deleted successfully',
             'users' => $users
         ]);
+    } catch (Exception $e) {
+        respond(400, ['error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// PATCH: update spin status and prize for a user
+if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+    try {
+        $body = file_get_contents('php://input');
+        $payload = json_decode($body, true);
+
+        if (!is_array($payload)) {
+            throw new RuntimeException('Invalid JSON payload');
+        }
+
+        $email = isset($payload['email']) ? trim((string)$payload['email']) : '';
+        $spin = isset($payload['spin']) ? trim((string)$payload['spin']) : 'yes';
+        $prizeGet = isset($payload['prizeGet']) ? trim((string)$payload['prizeGet']) : '';
+
+        if ($email === '') {
+            throw new RuntimeException('Email is required');
+        }
+
+        if ($spin !== 'yes' && $spin !== 'no') {
+            throw new RuntimeException('Invalid spin value');
+        }
+
+        $conn = getDBConnection();
+        ensureSpinHistoryColumns($conn);
+
+        $updateStmt = $conn->prepare(
+            "UPDATE users SET spin = ?, prizeGet = ?, updated_at = NOW() WHERE LOWER(email) = LOWER(?)"
+        );
+
+        if (!$updateStmt) {
+            throw new RuntimeException('Prepare failed: ' . $conn->error);
+        }
+
+        $updateStmt->bind_param("sss", $spin, $prizeGet, $email);
+
+        if (!$updateStmt->execute()) {
+            throw new RuntimeException('Update failed: ' . $conn->error);
+        }
+
+        $updateStmt->close();
+        closeDBConnection($conn);
+
+        respond(200, ['success' => true, 'message' => 'Spin result saved']);
     } catch (Exception $e) {
         respond(400, ['error' => $e->getMessage()]);
     }

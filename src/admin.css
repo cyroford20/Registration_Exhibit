@@ -67,6 +67,47 @@ body>* {
   padding-top: 40px;
 }
 
+.panel-switcher {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 16px 0 26px 0;
+  padding: 14px;
+  border: 2px solid rgba(0, 217, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(26, 31, 58, 0.45);
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.1);
+}
+
+.panel-btn {
+  font-family: "Orbitron", sans-serif;
+  padding: 10px 14px;
+  border: 2px solid rgba(0, 217, 255, 0.45);
+  border-radius: 6px;
+  color: var(--primary-color);
+  background: rgba(0, 217, 255, 0.08);
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  transition: all 0.25s ease;
+}
+
+.panel-btn:hover {
+  background: rgba(0, 217, 255, 0.16);
+}
+
+.panel-btn.active {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(0, 255, 136, 0.12);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.35);
+}
+
+.hidden-panel {
+  display: none;
+}
+
 /* Title styling */
 h1 {
   margin: 0 0 8px 0;

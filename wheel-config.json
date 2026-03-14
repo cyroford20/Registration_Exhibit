@@ -30,12 +30,6 @@
             "text": "#333333",
             "label": "Correction Tape",
             "weight": 1
-        },
-        {
-            "color": "#FFBC03",
-            "text": "#333333",
-            "label": "roll",
-            "weight": 1
         }
     ]
 }

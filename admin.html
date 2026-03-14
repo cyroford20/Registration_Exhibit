@@ -17,8 +17,14 @@
   <div class="admin">
     <h1>⚙️ WHEEL CONFIGURATION</h1>
 
+    <div class="panel-switcher" aria-label="Admin panel switcher">
+      <button id="showUserPanel" class="panel-btn active" type="button">User Registration</button>
+      <button id="showSectorPanel" class="panel-btn" type="button">Sector Configuration</button>
+      <button id="showAllPanels" class="panel-btn" type="button">Show All</button>
+    </div>
+
     <!-- USER REGISTRATION SECTION -->
-    <section class="user-registration-section">
+    <section id="userPanel" class="user-registration-section">
       <h2>👥 USER REGISTRATION</h2>
       <p class="muted">[ Register users before they can spin the wheel. ]</p>
 
@@ -51,30 +57,11 @@
       </div>
 
       <div id="regStatus" class="status" aria-live="polite"></div>
-
-      <div class="tableWrap">
-        <table class="table" aria-label="Registered users">
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Gender</th>
-              <th>College</th>
-              <th>Campus</th>
-              <th>Role</th>
-              <th>Registered</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="usersRows"></tbody>
-        </table>
-      </div>
     </section>
 
     <!-- WHEEL CONFIGURATION SECTION -->
-    <section class="wheel-config-section">
+    <section id="sectorPanel" class="wheel-config-section">
       <h2>🎡 SECTOR CONFIGURATION</h2>
-      <p class="muted">[ Edits are saved to <code>wheel-config.json</code> on this server. ]</p>
 
       <div class="actions">
         <button id="add">Add sector</button>

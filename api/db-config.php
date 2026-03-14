@@ -43,14 +43,58 @@ define('DB_PASSWORD', envFirst(['DB_PASSWORD', 'MYSQL_PASSWORD', 'MYSQLPASSWORD'
 define('DB_NAME', envFirst(['DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'DB_DATABASE', 'SQL_DATABASE'], $urlCfg['name'] ?? 'sql12819977'));
 define('DB_PORT', (int)envFirst(['DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'SQL_PORT'], $urlCfg['port'] ?? '3306'));
 
+function databaseExists(mysqli $conn, string $dbName): bool
+{
+    $escaped = $conn->real_escape_string($dbName);
+    $result = $conn->query("SHOW DATABASES LIKE '{$escaped}'");
+    if (!$result) {
+        return false;
+    }
+
+    $exists = $result->num_rows > 0;
+    $result->free();
+    return $exists;
+}
+
 // Create connection
 function getDBConnection()
 {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT);
+    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, '', DB_PORT);
 
     // Check connection
     if ($conn->connect_error) {
         throw new RuntimeException('Database connection failed: ' . $conn->connect_error);
+    }
+
+    $candidates = array_values(array_unique([
+        DB_NAME,
+        'sql12819977',
+        'cyber_spin_wheel',
+    ]));
+
+    $selectedDb = '';
+    foreach ($candidates as $candidate) {
+        if ($candidate !== '' && databaseExists($conn, $candidate)) {
+            $selectedDb = $candidate;
+            break;
+        }
+    }
+
+    // If configured DB doesn't exist, try creating it (works for local dev with permissions).
+    if ($selectedDb === '' && DB_NAME !== '') {
+        $escapedDb = str_replace('`', '``', DB_NAME);
+        $createSql = "CREATE DATABASE IF NOT EXISTS `{$escapedDb}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
+        if ($conn->query($createSql)) {
+            $selectedDb = DB_NAME;
+        }
+    }
+
+    if ($selectedDb === '') {
+        throw new RuntimeException('No usable database found. Set DB_NAME to an existing database.');
+    }
+
+    if (!$conn->select_db($selectedDb)) {
+        throw new RuntimeException('Failed to select database: ' . $conn->error);
     }
 
     // Set charset

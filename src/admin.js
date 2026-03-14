@@ -2,6 +2,71 @@ const rowsEl = document.querySelector("#rows");
 const statusEl = document.querySelector("#status");
 const addBtn = document.querySelector("#add");
 const saveBtn = document.querySelector("#save");
+const userPanelEl = document.querySelector("#userPanel");
+const sectorPanelEl = document.querySelector("#sectorPanel");
+const showUserPanelBtn = document.querySelector("#showUserPanel");
+const showSectorPanelBtn = document.querySelector("#showSectorPanel");
+const showAllPanelsBtn = document.querySelector("#showAllPanels");
+
+const ADMIN_PASSWORD = "admin123";
+const ADMIN_SESSION_KEY = "adminAuthenticated";
+
+function ensureAdminAccess() {
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === "1") {
+    return true;
+  }
+
+  const entered = window.prompt("Enter admin password:");
+  if (entered === ADMIN_PASSWORD) {
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+    return true;
+  }
+
+  if (entered !== null) {
+    window.alert("Incorrect password");
+  }
+  window.location.href = "/";
+  return false;
+}
+
+if (!ensureAdminAccess()) {
+  throw new Error("Unauthorized admin access");
+}
+
+function setActivePanelButton(activeBtn) {
+  [showUserPanelBtn, showSectorPanelBtn, showAllPanelsBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.classList.toggle("active", btn === activeBtn);
+  });
+}
+
+function showPanel(mode) {
+  if (!userPanelEl || !sectorPanelEl) return;
+
+  if (mode === "user") {
+    userPanelEl.classList.remove("hidden-panel");
+    sectorPanelEl.classList.add("hidden-panel");
+    setActivePanelButton(showUserPanelBtn);
+    return;
+  }
+
+  if (mode === "sector") {
+    userPanelEl.classList.add("hidden-panel");
+    sectorPanelEl.classList.remove("hidden-panel");
+    setActivePanelButton(showSectorPanelBtn);
+    return;
+  }
+
+  userPanelEl.classList.remove("hidden-panel");
+  sectorPanelEl.classList.remove("hidden-panel");
+  setActivePanelButton(showAllPanelsBtn);
+}
+
+showUserPanelBtn?.addEventListener("click", () => showPanel("user"));
+showSectorPanelBtn?.addEventListener("click", () => showPanel("sector"));
+showAllPanelsBtn?.addEventListener("click", () => showPanel("all"));
+
+showPanel("user");
 
 const usersRowsEl = document.querySelector("#usersRows");
 const regStatusEl = document.querySelector("#regStatus");
@@ -17,12 +82,14 @@ let sectors = [];
 let users = [];
 
 function setRegStatus(message, kind = "") {
+  if (!regStatusEl) return;
   regStatusEl.textContent = message;
   regStatusEl.style.opacity = message ? "1" : "0";
   regStatusEl.dataset.kind = kind;
 }
 
 function renderUsers() {
+  if (!usersRowsEl) return;
   usersRowsEl.innerHTML = "";
 
   users.forEach((user) => {
@@ -79,6 +146,7 @@ function renderUsers() {
 }
 
 async function loadUsers() {
+  if (!usersRowsEl) return;
   try {
     const res = await fetch("api/users.php", { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to load users");
@@ -310,7 +378,7 @@ registerBtn.addEventListener("click", () => {
   registerUser();
 });
 
-userNameInput.addEventListener("keypress", (e) => {
+userFullnameInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") registerUser();
 });
 
@@ -318,6 +386,5 @@ userEmailInput.addEventListener("keypress", (e) => {
   if (e.key === "Enter") registerUser();
 });
 
-// Load both wheel config and users on page load
+// Load wheel config on page load
 load().catch((e) => setStatus(e.message || String(e)));
-loadUsers();

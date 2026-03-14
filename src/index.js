@@ -8,9 +8,33 @@ const playerCampusSelect = document.querySelector("#playerCampus");
 const playerRoleSelect = document.querySelector("#playerRole");
 const startBtn = document.querySelector("#startBtn");
 const playerRegStatus = document.querySelector("#playerRegStatus");
+const adminLink = document.querySelector(".admin-link");
+const queueListEl = document.querySelector("#queueList");
+const historyListEl = document.querySelector("#historyList");
 
 let currentPlayer = null;
 let registeredUsers = [];
+let queueUsers = [];
+let historyUsers = [];
+let activeSpinUser = null;
+const REQUIRE_REGISTRATION = false;
+const ADMIN_PASSWORD = "admin123";
+const ADMIN_SESSION_KEY = "adminAuthenticated";
+
+if (adminLink) {
+  adminLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    const entered = window.prompt("Enter admin password:");
+    if (entered === ADMIN_PASSWORD) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "1");
+      window.location.href = "admin.html";
+      return;
+    }
+    if (entered !== null) {
+      window.alert("Incorrect password");
+    }
+  });
+}
 
 // Load registered users and check if current player is registered
 async function loadRegisteredUsers() {
@@ -21,6 +45,90 @@ async function loadRegisteredUsers() {
     registeredUsers = data.users || [];
   } catch (e) {
     console.error("Error loading users:", e);
+  }
+}
+
+function formatDate(value) {
+  const d = value ? new Date(value) : null;
+  return d && !Number.isNaN(d.getTime()) ? d.toLocaleString() : "-";
+}
+
+function renderQueueAndHistory() {
+  if (queueListEl) {
+    queueListEl.innerHTML = "";
+    if (queueUsers.length === 0) {
+      queueListEl.innerHTML = '<li class="queue-empty">No users in queue.</li>';
+    } else {
+      queueUsers.forEach((user, i) => {
+        const li = document.createElement("li");
+        li.className = "queue-item";
+        li.innerHTML = `
+          <div class="queue-name">${i + 1}. ${user.fullname || "Unnamed"}</div>
+          <div class="queue-meta">Registered: ${formatDate(user.registered_at)}</div>
+        `;
+        queueListEl.appendChild(li);
+      });
+    }
+  }
+
+  if (historyListEl) {
+    historyListEl.innerHTML = "";
+    if (historyUsers.length === 0) {
+      historyListEl.innerHTML = '<li class="queue-empty">No spin history yet.</li>';
+    } else {
+      historyUsers.forEach((user) => {
+        const li = document.createElement("li");
+        li.className = "queue-item";
+        li.innerHTML = `
+          <div class="queue-name">${user.fullname || "Unnamed"}</div>
+          <div class="queue-prize">Prize: ${user.prizeGet || "-"}</div>
+          <div class="queue-meta">Registered: ${formatDate(user.registered_at)}</div>
+        `;
+        historyListEl.appendChild(li);
+      });
+    }
+  }
+}
+
+async function refreshQueueAndHistory() {
+  try {
+    const res = await fetch("api/users.php", { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to load users");
+    const data = await res.json();
+    const users = Array.isArray(data.users) ? data.users : [];
+
+    users.sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
+    queueUsers = users.filter((u) => (u.spin || "no") !== "yes");
+    historyUsers = users.filter((u) => (u.spin || "no") === "yes");
+
+    renderQueueAndHistory();
+  } catch (err) {
+    console.error("Queue/History load error:", err);
+  }
+}
+
+function getActiveSpinUser() {
+  if (currentPlayer && currentPlayer.email && currentPlayer.email !== "guest@local") {
+    const matched = queueUsers.find(
+      (u) => String(u.email || "").toLowerCase() === String(currentPlayer.email).toLowerCase()
+    );
+    if (matched) return matched;
+  }
+
+  return queueUsers.length > 0 ? queueUsers[0] : null;
+}
+
+async function saveSpinResult(user, prizeLabel) {
+  if (!user || !user.email) return;
+
+  try {
+    await fetch("api/users.php", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: user.email, spin: "yes", prizeGet: prizeLabel }),
+    });
+  } catch (err) {
+    console.error("Failed to save spin result:", err);
   }
 }
 
@@ -104,6 +212,20 @@ async function handlePlayerStart() {
 
 // Initialize registration
 async function initRegistration() {
+  if (!REQUIRE_REGISTRATION) {
+    currentPlayer = {
+      fullname: "Guest",
+      email: "guest@local",
+      college: "N/A",
+      gender: "N/A",
+      campus: "N/A",
+      role: "Guest",
+    };
+    sessionStorage.setItem("currentPlayer", JSON.stringify(currentPlayer));
+    registrationModal.classList.add("hidden");
+    return;
+  }
+
   await loadRegisteredUsers();
 
   // Check if player is already in session
@@ -347,7 +469,7 @@ async function init() {
     if (isSpinning) return;
 
     // Check if player is registered before allowing spin
-    if (!currentPlayer) {
+    if (REQUIRE_REGISTRATION && !currentPlayer) {
       registrationModal.classList.remove("hidden");
       playerRegStatus.textContent = "Please register first to spin!";
       playerRegStatus.dataset.kind = "error";
@@ -355,6 +477,7 @@ async function init() {
       return;
     }
 
+    activeSpinUser = getActiveSpinUser();
     const idx = pickWeightedIndex();
     spinToIndex(idx);
   });
@@ -364,11 +487,16 @@ async function init() {
 
   // Initialize registration modal
   initRegistration();
+  refreshQueueAndHistory();
+  setInterval(refreshQueueAndHistory, 10000);
 }
 
 // Start initialization when DOM is ready
 init();
 
-events.addListener("spinEnd", (sector) => {
+events.addListener("spinEnd", async (sector) => {
   console.log(`Woop! You won ${sector.label}`);
+  await saveSpinResult(activeSpinUser, sector.label);
+  activeSpinUser = null;
+  await refreshQueueAndHistory();
 });

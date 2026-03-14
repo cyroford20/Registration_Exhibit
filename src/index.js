@@ -76,10 +76,11 @@ function renderQueueAndHistory() {
 
   if (historyListEl) {
     historyListEl.innerHTML = "";
-    if (historyUsers.length === 0) {
+    const historyPreview = historyUsers.slice(0, 3);
+    if (historyPreview.length === 0) {
       historyListEl.innerHTML = '<li class="queue-empty">No spin history yet.</li>';
     } else {
-      historyUsers.forEach((user) => {
+      historyPreview.forEach((user) => {
         const li = document.createElement("li");
         li.className = "queue-item";
         li.innerHTML = `

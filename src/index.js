@@ -58,10 +58,11 @@ function formatDate(value) {
 function renderQueueAndHistory() {
   if (queueListEl) {
     queueListEl.innerHTML = "";
-    if (queueUsers.length === 0) {
+    const queuePreview = queueUsers.slice(0, 3);
+    if (queuePreview.length === 0) {
       queueListEl.innerHTML = '<li class="queue-empty">No users in queue.</li>';
     } else {
-      queueUsers.forEach((user, i) => {
+      queuePreview.forEach((user, i) => {
         const li = document.createElement("li");
         li.className = "queue-item";
         li.innerHTML = `
@@ -99,9 +100,20 @@ async function refreshQueueAndHistory() {
     const data = await res.json();
     const users = Array.isArray(data.users) ? data.users : [];
 
-    users.sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
-    queueUsers = users.filter((u) => (u.spin || "no") !== "yes");
-    historyUsers = users.filter((u) => (u.spin || "no") === "yes");
+    const waitingUsers = users
+      .filter((u) => (u.spin || "no") !== "yes")
+      .sort((a, b) => new Date(a.registered_at) - new Date(b.registered_at));
+
+    const spunUsers = users
+      .filter((u) => (u.spin || "no") === "yes")
+      .sort((a, b) => {
+        const aTime = new Date(a.updated_at || a.registered_at).getTime();
+        const bTime = new Date(b.updated_at || b.registered_at).getTime();
+        return bTime - aTime;
+      });
+
+    queueUsers = waitingUsers;
+    historyUsers = spunUsers;
 
     renderQueueAndHistory();
   } catch (err) {

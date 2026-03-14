@@ -168,24 +168,31 @@ header {
 }
 
 .main-content {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) auto minmax(240px, 320px);
+  justify-content: space-between;
   align-items: flex-start;
   gap: 28px;
   flex: 1;
   position: relative;
   z-index: 10;
-  width: min(1280px, 96vw);
+  width: min(100vw, 1400px);
+  padding: 0 20px;
+}
+
+.side-panel {
+  width: 100%;
+  max-height: 72vh;
+  overflow: auto;
+  align-self: center;
 }
 
 .queue-panel {
-  width: 320px;
-  max-height: 72vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding-right: 4px;
+  justify-self: start;
+}
+
+.history-panel {
+  justify-self: end;
 }
 
 .queue-card {
@@ -256,6 +263,7 @@ header {
 .wheel-wrapper {
   position: relative;
   display: inline-block;
+  justify-self: center;
 }
 
 .winner-arrow {
@@ -466,14 +474,16 @@ footer {
 
   .main-content {
     width: 100%;
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: center;
     gap: 14px;
+    padding: 0 10px;
   }
 
-  .queue-panel {
+  .side-panel {
     width: min(92vw, 500px);
     max-height: none;
+    justify-self: center;
   }
 
   .main-title {

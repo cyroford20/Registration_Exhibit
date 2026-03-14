@@ -77,6 +77,7 @@ const userGenderSelect = document.querySelector("#userGender");
 const userCampusSelect = document.querySelector("#userCampus");
 const userRoleSelect = document.querySelector("#userRole");
 const registerBtn = document.querySelector("#registerBtn");
+const exportUsersExcelBtn = document.querySelector("#exportUsersExcel");
 
 let sectors = [];
 let users = [];
@@ -228,6 +229,110 @@ async function deleteUser(userId) {
   }
 }
 
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) {
+    return '""';
+  }
+
+  const str = String(value).replace(/"/g, '""');
+  return `"${str}"`;
+}
+
+function buildUsersCsv(usersList) {
+  const headers = [
+    "Full Name",
+    "Email",
+    "Gender",
+    "College",
+    "Campus",
+    "Role",
+    "Spin",
+    "Prize",
+    "Registered At",
+    "Updated At",
+  ];
+
+  const lines = [headers.map(escapeCsvValue).join(",")];
+
+  usersList.forEach((user) => {
+    lines.push(
+      [
+        user.fullname,
+        user.email,
+        user.gender,
+        user.college,
+        user.campus,
+        user.role,
+        user.spin,
+        user.prizeGet,
+        user.registered_at,
+        user.updated_at,
+      ]
+        .map(escapeCsvValue)
+        .join(",")
+    );
+  });
+
+  return lines.join("\r\n");
+}
+
+async function exportUsersToExcel() {
+  try {
+    setRegStatus("Preparing Excel export...");
+    const res = await fetch("api/users.php", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error("Failed to load users");
+    }
+
+    const data = await res.json();
+    const usersList = Array.isArray(data.users) ? data.users : [];
+
+    if (!usersList.length) {
+      setRegStatus("No users to export", "error");
+      return;
+    }
+
+    const date = new Date().toISOString().slice(0, 10);
+
+    if (window.XLSX && typeof window.XLSX.utils?.book_new === "function") {
+      const exportRows = usersList.map((user) => ({
+        "Full Name": user.fullname || "",
+        Email: user.email || "",
+        Gender: user.gender || "",
+        College: user.college || "",
+        Campus: user.campus || "",
+        Role: user.role || "",
+        Spin: user.spin || "",
+        Prize: user.prizeGet || "",
+        "Registered At": user.registered_at || "",
+        "Updated At": user.updated_at || "",
+      }));
+
+      const workbook = window.XLSX.utils.book_new();
+      const worksheet = window.XLSX.utils.json_to_sheet(exportRows);
+      window.XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+      window.XLSX.writeFile(workbook, `registered-users-${date}.xlsx`);
+    } else {
+      const csv = buildUsersCsv(usersList);
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `registered-users-${date}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    setRegStatus("Excel export ready", "success");
+    setTimeout(() => setRegStatus(""), 3000);
+  } catch (e) {
+    setRegStatus("Export failed: " + e.message, "error");
+  }
+}
+
 function updateProbabilities() {
   const totalWeight = sectors.reduce((sum, s) => sum + (Number(s.weight) || 0), 0);
   const rows = Array.from(rowsEl.children);
@@ -376,6 +481,10 @@ saveBtn.addEventListener("click", () => {
 
 registerBtn.addEventListener("click", () => {
   registerUser();
+});
+
+exportUsersExcelBtn?.addEventListener("click", () => {
+  exportUsersToExcel();
 });
 
 userFullnameInput.addEventListener("keypress", (e) => {

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register via QR Code - Cyber Spin Wheel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -261,8 +262,8 @@
                 <a href="#" class="btn btn-primary" onclick="directRegister(); return false;">
                     ➤ Direct Register
                 </a>
-                <button class="btn btn-download" onclick="downloadQR()">
-                    ⬇️ Download QR Code
+                <button class="btn btn-download" onclick="exportQRPDF()">
+                    📄 Export PDF
                 </button>
                 <a href="/" class="btn btn-secondary">
                     ← Back to Wheel
@@ -295,14 +296,48 @@
             window.location.href = '/register.html';
         }
 
-        // Download QR Code function
-        function downloadQR() {
+        // Export QR as PDF with header and footer
+        function exportQRPDF() {
             const canvas = document.querySelector('#qrCode canvas');
             if (canvas) {
-                const link = document.createElement('a');
-                link.href = canvas.toDataURL('image/png');
-                link.download = 'cyber-spin-wheel-registration-qr.png';
-                link.click();
+                const qrDataUrl = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+
+                // Header
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(18);
+                pdf.text('CYBER SPIN WHEEL', pageWidth / 2, 18, { align: 'center' });
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text('Registration QR Code', pageWidth / 2, 26, { align: 'center' });
+
+                // QR image
+                const qrSize = 110;
+                const qrX = (pageWidth - qrSize) / 2;
+                const qrY = 38;
+                pdf.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+
+                // URL text
+                pdf.setFontSize(10);
+                pdf.text(`URL: ${registrationUrl}`, pageWidth / 2, qrY + qrSize + 12, { align: 'center' });
+
+                // Footer
+                pdf.setFontSize(9);
+                const exportedAt = new Date().toLocaleString();
+                pdf.text(`Generated: ${exportedAt}`, 14, pageHeight - 10);
+                pdf.text('Cyber Spin Wheel - IT Exhibit', pageWidth - 14, pageHeight - 10, { align: 'right' });
+
+                pdf.save('cyber-spin-wheel-registration-qr.pdf');
+            } else {
+                window.alert('QR code is not ready yet. Please try again.');
             }
         }
     </script>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Cyber Spin Wheel Admin - IT Exhibit</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+  </style>
+  <link rel="stylesheet" href="src/styles.css" />
+  <link rel="stylesheet" href="src/admin.css" />
+</head>
+
+<body>
+  <div class="admin">
+    <h1>⚙️ WHEEL CONFIGURATION</h1>
+
+    <!-- USER REGISTRATION SECTION -->
+    <section class="user-registration-section">
+      <h2>👥 USER REGISTRATION</h2>
+      <p class="muted">[ Register users before they can spin the wheel. ]</p>
+
+      <div class="registration-form">
+        <input type="text" id="userFullname" placeholder="Full Name" class="reg-input" />
+        <input type="email" id="userEmail" placeholder="Email Address" class="reg-input" />
+        <input type="text" id="userCollege" placeholder="College" class="reg-input" />
+        <select id="userGender" class="reg-select">
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Others">Others</option>
+        </select>
+        <select id="userCampus" class="reg-select">
+          <option value="">Select Campus</option>
+          <option value="MCC">MCC</option>
+          <option value="MMC">MMC</option>
+          <option value="MBC">MBC</option>
+        </select>
+        <select id="userRole" class="reg-select">
+          <option value="">Select Role</option>
+          <option value="Student">Student</option>
+          <option value="Faculty">Faculty</option>
+          <option value="Non-Teaching">Non-Teaching</option>
+          <option value="Others">Others</option>
+        </select>
+        <button id="registerBtn" class="reg-button">Register User</button>
+        <a href="/qr-register.html" class="reg-button"
+          style="background: linear-gradient(135deg, #ff006e 0%, #ff1493 100%); text-decoration: none; display: inline-block; margin-left: 10px;">📱
+          QR Registration</a>
+      </div>
+
+      <div id="regStatus" class="status" aria-live="polite"></div>
+
+      <div class="tableWrap">
+        <table class="table" aria-label="Registered users">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Gender</th>
+              <th>College</th>
+              <th>Campus</th>
+              <th>Role</th>
+              <th>Registered</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="usersRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- WHEEL CONFIGURATION SECTION -->
+    <section class="wheel-config-section">
+      <h2>🎡 SECTOR CONFIGURATION</h2>
+      <p class="muted">[ Edits are saved to <code>wheel-config.json</code> on this server. ]</p>
+
+      <div class="actions">
+        <button id="add">Add sector</button>
+        <button id="save">Save</button>
+        <a class="link" href="/">Back to wheel</a>
+      </div>
+
+      <div id="status" class="status" aria-live="polite"></div>
+
+      <div class="tableWrap">
+        <table class="table" aria-label="Wheel sectors">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Color</th>
+              <th>Text</th>
+              <th>Weight</th>
+              <th>Probability</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script defer src="src/admin.js"></script>
+</body>
+
+</html>

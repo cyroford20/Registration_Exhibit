@@ -1,0 +1,41 @@
+{
+    "version": 1,
+    "sectors": [
+        {
+            "color": "#4E79A7",
+            "text": "#333333",
+            "label": "404 Prize\nNot Found",
+            "weight": 20
+        },
+        {
+            "color": "#59A14F",
+            "text": "#333333",
+            "label": "Ballpen",
+            "weight": 4
+        },
+        {
+            "color": "#F28E2B",
+            "text": "#333333",
+            "label": "Sticky Notes",
+            "weight": 3
+        },
+        {
+            "color": "#E15759",
+            "text": "#333333",
+            "label": "1/4 paper",
+            "weight": 2
+        },
+        {
+            "color": "#B07AA1",
+            "text": "#333333",
+            "label": "Correction Tape",
+            "weight": 1
+        },
+        {
+            "color": "#FFBC03",
+            "text": "#333333",
+            "label": "roll",
+            "weight": 1
+        }
+    ]
+}

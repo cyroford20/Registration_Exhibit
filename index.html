@@ -1,19 +1,83 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Welcome to Spin the Wheel</title>
-    <meta charset="UTF-8" />
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap");
-    </style>
-    <link rel="stylesheet" href="src/styles.css" />
-  </head>
 
-  <body>
-    <div id="spin_the_wheel">
-      <canvas id="wheel" width="800" height="800"></canvas>
-      <div id="spin">SPIN</div>
+<head>
+  <title>Cyber Spin Wheel - IT Exhibit</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+    @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+  </style>
+  <link rel="stylesheet" href="src/styles.css" />
+</head>
+
+<body>
+  <div class="stars"></div>
+  <div class="background-grid"></div>
+
+  <!-- Registration Modal -->
+  <div id="registrationModal" class="registration-modal">
+    <div class="modal-content">
+      <h2>REGISTER TO SPIN</h2>
+      <p class="modal-subtitle">Enter your details to begin</p>
+
+      <div class="modal-form">
+        <input type="text" id="playerFullname" placeholder="Full Name" class="modal-input" autocomplete="name" />
+        <input type="email" id="playerEmail" placeholder="Email" class="modal-input" autocomplete="email" />
+        <input type="text" id="playerCollege" placeholder="College" class="modal-input" />
+        <select id="playerGender" class="modal-select">
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Others">Others</option>
+        </select>
+        <select id="playerCampus" class="modal-select">
+          <option value="">Select Campus</option>
+          <option value="MCC">MCC</option>
+          <option value="MMC">MMC</option>
+          <option value="MBC">MBC</option>
+        </select>
+        <select id="playerRole" class="modal-select">
+          <option value="">Select Role</option>
+          <option value="Student">Student</option>
+          <option value="Faculty">Faculty</option>
+          <option value="Non-Teaching">Non-Teaching</option>
+          <option value="Others">Others</option>
+        </select>
+        <button id="startBtn" class="modal-button">START SPINNING</button>
+      </div>
+
+      <div id="playerRegStatus" class="status" aria-live="polite"></div>
     </div>
-    <script defer src="src/index.js"></script>
-  </body>
+  </div>
+
+  <header class="header">
+    <div class="title-container">
+      <h1 class="main-title">CYBER SPIN WHEEL</h1>
+      <p class="subtitle">IT Exhibit Experience</p>
+    </div>
+    <a class="admin-link" href="admin.html">⚙️ Admin</a>
+  </header>
+
+  <main class="main-content">
+    <div class="wheel-wrapper">
+      <div class="winner-arrow"></div>
+      <div class="glow-ring"></div>
+      <div id="spin_the_wheel">
+        <canvas id="wheel"></canvas>
+        <div id="spin">
+          <span class="spin-text">SPIN</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-text">[ Interactive Probability Wheel ]</p>
+  </footer>
+
+  <script defer src="src/index.js"></script>
+</body>
+
 </html>

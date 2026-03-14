@@ -274,7 +274,7 @@
         // Get the current domain/host
         const protocol = window.location.protocol;
         const host = window.location.host;
-        const registrationUrl = `${protocol}//${host}/admin.html`;
+        const registrationUrl = `${protocol}//${host}/`;
 
         // Display the URL
         document.getElementById('urlDisplay').textContent = registrationUrl;
@@ -291,7 +291,7 @@
 
         // Direct registration function
         function directRegister() {
-            window.location.href = '/admin.html';
+            window.location.href = '/';
         }
 
         // Download QR Code function

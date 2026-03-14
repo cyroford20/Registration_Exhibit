@@ -440,6 +440,44 @@ footer {
   opacity: 0.6;
 }
 
+.spin-result-toast {
+  position: fixed;
+  top: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 120;
+  min-width: 320px;
+  max-width: min(90vw, 680px);
+  text-align: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 2px solid rgba(0, 217, 255, 0.5);
+  background: rgba(10, 14, 39, 0.9);
+  color: #ffffff;
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 1px;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.spin-result-toast.show {
+  opacity: 1;
+}
+
+.spin-result-toast.win {
+  border-color: rgba(0, 255, 136, 0.8);
+  color: #00ff88;
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.55);
+}
+
+.spin-result-toast.lose {
+  border-color: rgba(255, 90, 16, 0.85);
+  color: #ffbc03;
+  box-shadow: 0 0 24px rgba(255, 90, 16, 0.55);
+}
+
 .page-title {
   position: fixed;
   top: 12px;

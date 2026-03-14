@@ -11,12 +11,14 @@ const playerRegStatus = document.querySelector("#playerRegStatus");
 const adminLink = document.querySelector(".admin-link");
 const queueListEl = document.querySelector("#queueList");
 const historyListEl = document.querySelector("#historyList");
+const spinResultToastEl = document.querySelector("#spinResultToast");
 
 let currentPlayer = null;
 let registeredUsers = [];
 let queueUsers = [];
 let historyUsers = [];
 let activeSpinUser = null;
+let spinResultToastTimer = null;
 const REQUIRE_REGISTRATION = false;
 const ADMIN_PASSWORD = "admin123";
 const ADMIN_SESSION_KEY = "adminAuthenticated";
@@ -116,6 +118,23 @@ function getActiveSpinUser() {
   }
 
   return queueUsers.length > 0 ? queueUsers[0] : null;
+}
+
+function showSpinResultMessage(message, kind) {
+  if (!spinResultToastEl) return;
+
+  if (spinResultToastTimer) {
+    clearTimeout(spinResultToastTimer);
+  }
+
+  spinResultToastEl.textContent = message;
+  spinResultToastEl.classList.remove("win", "lose", "show");
+  spinResultToastEl.classList.add(kind === "lose" ? "lose" : "win");
+  spinResultToastEl.classList.add("show");
+
+  spinResultToastTimer = setTimeout(() => {
+    spinResultToastEl.classList.remove("show", "win", "lose");
+  }, 3200);
 }
 
 async function saveSpinResult(user, prizeLabel) {
@@ -496,6 +515,14 @@ init();
 
 events.addListener("spinEnd", async (sector) => {
   console.log(`Woop! You won ${sector.label}`);
+
+  const normalized = String(sector.label || "").toLowerCase();
+  if (normalized.includes("404")) {
+    showSpinResultMessage("404 prize not found, better luck next time", "lose");
+  } else {
+    showSpinResultMessage(`You win a ${sector.label}!`, "win");
+  }
+
   await saveSpinResult(activeSpinUser, sector.label);
   activeSpinUser = null;
   await refreshQueueAndHistory();

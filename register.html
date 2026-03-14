@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Account - Cyber Spin Wheel</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Space Mono", monospace;
+            color: #e0e0ff;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d2847 100%);
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .register-card {
+            width: min(560px, 94vw);
+            background: rgba(26, 31, 58, 0.9);
+            border: 3px solid rgba(0, 217, 255, 0.55);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow:
+                0 0 28px rgba(0, 217, 255, 0.4),
+                0 0 50px rgba(255, 0, 110, 0.18),
+                inset 0 0 22px rgba(0, 245, 255, 0.08);
+        }
+
+        h1 {
+            font-family: "Orbitron", sans-serif;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            color: #00d9ff;
+            letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(0, 217, 255, 0.7);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(200, 210, 255, 0.8);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .input,
+        .select {
+            width: 100%;
+            padding: 13px 14px;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 217, 255, 0.45);
+            background: rgba(15, 20, 50, 0.88);
+            color: #ffffff;
+            font-family: "Space Mono", monospace;
+            font-size: 0.92rem;
+            transition: all 0.2s ease;
+        }
+
+        .input::placeholder {
+            color: rgba(200, 210, 255, 0.75);
+        }
+
+        .input:focus,
+        .select:focus {
+            outline: none;
+            border-color: #00d9ff;
+            box-shadow:
+                0 0 14px rgba(0, 217, 255, 0.6),
+                inset 0 0 10px rgba(0, 217, 255, 0.16);
+        }
+
+        .select option {
+            background: #0a0e27;
+            color: #ffffff;
+        }
+
+        .register-btn {
+            margin-top: 6px;
+            padding: 13px 16px;
+            border-radius: 8px;
+            border: 2px solid rgba(0, 255, 136, 0.8);
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(0, 255, 136, 0.1));
+            color: #00ff88;
+            font-family: "Orbitron", sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .register-btn:hover {
+            transform: scale(1.02);
+            box-shadow:
+                0 0 18px rgba(0, 255, 136, 0.55),
+                0 0 28px rgba(0, 217, 255, 0.3);
+        }
+
+        .register-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            min-height: 22px;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #00ff88;
+        }
+
+        .status.error {
+            color: #ff5a84;
+        }
+    </style>
+</head>
+
+<body>
+    <section class="register-card" aria-label="Register account">
+        <h1>REGISTER AN ACCOUNT</h1>
+        <p class="subtitle">Scan, fill up, and register for the spin wheel.</p>
+
+        <form id="registerForm" class="form-grid">
+            <input id="fullname" class="input" type="text" placeholder="Full Name" required />
+            <input id="email" class="input" type="email" placeholder="Email" required />
+            <input id="college" class="input" type="text" placeholder="College" required />
+
+            <select id="gender" class="select" title="Gender" aria-label="Gender" required>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Others">Others</option>
+            </select>
+
+            <select id="campus" class="select" title="Campus" aria-label="Campus" required>
+                <option value="">Select Campus</option>
+                <option value="MCC">MCC</option>
+                <option value="MMC">MMC</option>
+                <option value="MBC">MBC</option>
+            </select>
+
+            <select id="role" class="select" title="Role" aria-label="Role" required>
+                <option value="">Select Role</option>
+                <option value="Student">Student</option>
+                <option value="Faculty">Faculty</option>
+                <option value="Non-Teaching">Non-Teaching</option>
+                <option value="Others">Others</option>
+            </select>
+
+            <button id="registerBtn" class="register-btn" type="submit">Register Account</button>
+        </form>
+
+        <div id="status" class="status" aria-live="polite"></div>
+    </section>
+
+    <script>
+        const form = document.querySelector("#registerForm");
+        const statusEl = document.querySelector("#status");
+        const registerBtn = document.querySelector("#registerBtn");
+
+        const fullnameInput = document.querySelector("#fullname");
+        const emailInput = document.querySelector("#email");
+        const collegeInput = document.querySelector("#college");
+        const genderSelect = document.querySelector("#gender");
+        const campusSelect = document.querySelector("#campus");
+        const roleSelect = document.querySelector("#role");
+
+        function setStatus(message, isError = false) {
+            statusEl.textContent = message;
+            statusEl.classList.toggle("error", isError);
+        }
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const fullname = fullnameInput.value.trim();
+            const email = emailInput.value.trim();
+            const college = collegeInput.value.trim();
+            const gender = genderSelect.value;
+            const campus = campusSelect.value;
+            const role = roleSelect.value;
+
+            if (!fullname || !email || !college || !gender || !campus || !role) {
+                setStatus("Please fill in all fields.", true);
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = "Registering...";
+            setStatus("Submitting registration...");
+
+            try {
+                const res = await fetch("api/users.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fullname, email, college, gender, campus, role }),
+                });
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    const message = String(data.error || "Registration failed");
+                    if (message.toLowerCase().includes("already registered")) {
+                        throw new Error("You are already registered");
+                    }
+                    throw new Error(message);
+                }
+
+                form.reset();
+                setStatus("Registered successfully");
+            } catch (err) {
+                setStatus(err.message || "Registration failed", true);
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = "Register Account";
+            }
+        });
+    </script>
+</body>
+
+</html>

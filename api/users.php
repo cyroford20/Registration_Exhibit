@@ -125,20 +125,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn = getDBConnection();
         ensureSpinHistoryColumns($conn);
 
-        // Check for duplicate email
-        $checkStmt = $conn->prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?)");
+        // Check for duplicate email or duplicate full name
+        $checkStmt = $conn->prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?) OR LOWER(fullname) = LOWER(?)");
         if (!$checkStmt) {
             throw new RuntimeException('Prepare failed: ' . $conn->error);
         }
 
-        $checkStmt->bind_param("s", $email);
+        $checkStmt->bind_param("ss", $email, $fullname);
         $checkStmt->execute();
         $checkStmt->store_result();
 
         if ($checkStmt->num_rows > 0) {
             $checkStmt->close();
             closeDBConnection($conn);
-            throw new RuntimeException('User with this email already exists');
+            throw new RuntimeException('You are already registered');
         }
 
         $checkStmt->close();

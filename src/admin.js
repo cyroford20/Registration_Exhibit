@@ -93,10 +93,14 @@ let sectors = [];
 let users = [];
 
 function setRegStatus(message, kind = "") {
-  if (!regStatusEl) return;
-  regStatusEl.textContent = message;
-  regStatusEl.style.opacity = message ? "1" : "0";
-  regStatusEl.dataset.kind = kind;
+  if (regStatusEl) {
+    regStatusEl.textContent = message;
+    regStatusEl.style.opacity = message ? "1" : "0";
+    regStatusEl.dataset.kind = kind;
+    return;
+  }
+
+  setStatus(message, kind);
 }
 
 function renderUsers() {

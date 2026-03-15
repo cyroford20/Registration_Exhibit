@@ -88,15 +88,21 @@ const userCampusSelect = document.querySelector("#userCampus");
 const userRoleSelect = document.querySelector("#userRole");
 const registerBtn = document.querySelector("#registerBtn");
 const exportUsersExcelBtn = document.querySelector("#exportUsersExcel");
+const exportUsersPdfBtn = document.querySelector("#exportUsersPdf");
 
 let sectors = [];
 let users = [];
 
 function setRegStatus(message, kind = "") {
+  if (!regStatusEl) return;
+  regStatusEl.textContent = message;
+  regStatusEl.style.opacity = message ? "1" : "0";
+  regStatusEl.dataset.kind = kind;
+}
+
+function setUserExportStatus(message, kind = "") {
   if (regStatusEl) {
-    regStatusEl.textContent = message;
-    regStatusEl.style.opacity = message ? "1" : "0";
-    regStatusEl.dataset.kind = kind;
+    setRegStatus(message, kind);
     return;
   }
 
@@ -293,7 +299,7 @@ function buildUsersCsv(usersList) {
 
 async function exportUsersToExcel() {
   try {
-    setRegStatus("Preparing Excel export...");
+    setUserExportStatus("Preparing Excel export...");
     const res = await fetch("api/users.php", { cache: "no-store" });
     if (!res.ok) {
       throw new Error("Failed to load users");
@@ -303,7 +309,7 @@ async function exportUsersToExcel() {
     const usersList = Array.isArray(data.users) ? data.users : [];
 
     if (!usersList.length) {
-      setRegStatus("No users to export", "error");
+      setUserExportStatus("No users to export", "error");
       return;
     }
 
@@ -341,10 +347,101 @@ async function exportUsersToExcel() {
       URL.revokeObjectURL(url);
     }
 
-    setRegStatus("Excel export ready", "success");
-    setTimeout(() => setRegStatus(""), 3000);
+    setUserExportStatus("Excel export ready", "success");
+    setTimeout(() => setUserExportStatus(""), 3000);
   } catch (e) {
-    setRegStatus("Export failed: " + e.message, "error");
+    setUserExportStatus("Export failed: " + e.message, "error");
+  }
+}
+
+async function exportUsersToPdf() {
+  try {
+    setUserExportStatus("Preparing PDF export...");
+    const res = await fetch("api/users.php", { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error("Failed to load users");
+    }
+
+    const data = await res.json();
+    const usersList = Array.isArray(data.users) ? data.users : [];
+
+    if (!usersList.length) {
+      setUserExportStatus("No users to export", "error");
+      return;
+    }
+
+    if (!window.jspdf || typeof window.jspdf.jsPDF !== "function") {
+      throw new Error("PDF library failed to load");
+    }
+
+    const doc = new window.jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const now = new Date();
+    const dateLabel = now.toLocaleString();
+
+    const columns = [
+      "Full Name",
+      "Email",
+      "Gender",
+      "College",
+      "Campus",
+      "Role",
+      "Spin",
+      "Prize",
+      "Registered At",
+    ];
+
+    const rows = usersList.map((user) => [
+      user.fullname || "",
+      user.email || "",
+      user.gender || "",
+      user.college || "",
+      user.campus || "",
+      user.role || "",
+      user.spin || "",
+      user.prizeGet || "",
+      user.registered_at ? new Date(user.registered_at).toLocaleString() : "",
+    ]);
+
+    doc.autoTable({
+      head: [columns],
+      body: rows,
+      startY: 110,
+      margin: { left: 24, right: 24, top: 88, bottom: 36 },
+      styles: { fontSize: 8, cellPadding: 5, overflow: "linebreak" },
+      headStyles: { fillColor: [12, 54, 94], textColor: [235, 248, 255], fontStyle: "bold" },
+      didDrawPage: (hookData) => {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const pageNumber = doc.internal.getNumberOfPages();
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(12, 54, 94);
+        doc.text("Cyber Spin Wheel - Registered Users", 24, 36);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(80, 92, 108);
+        doc.text(`Generated: ${dateLabel}`, 24, 56);
+        doc.text(`Total users: ${usersList.length}`, 24, 72);
+
+        doc.setDrawColor(210, 218, 226);
+        doc.line(24, 82, pageWidth - 24, 82);
+
+        doc.setFontSize(9);
+        doc.setTextColor(95, 106, 119);
+        doc.text("Cyber Spin Wheel Admin Report", 24, pageHeight - 16);
+        doc.text(`Page ${pageNumber}`, pageWidth - 70, pageHeight - 16);
+      },
+    });
+
+    const fileDate = now.toISOString().slice(0, 10);
+    doc.save(`registered-users-${fileDate}.pdf`);
+
+    setUserExportStatus("PDF export ready", "success");
+    setTimeout(() => setUserExportStatus(""), 3000);
+  } catch (e) {
+    setUserExportStatus("PDF export failed: " + e.message, "error");
   }
 }
 
@@ -513,6 +610,10 @@ registerBtn?.addEventListener("click", () => {
 
 exportUsersExcelBtn?.addEventListener("click", () => {
   exportUsersToExcel();
+});
+
+exportUsersPdfBtn?.addEventListener("click", () => {
+  exportUsersToPdf();
 });
 
 userFullnameInput?.addEventListener("keypress", (e) => {

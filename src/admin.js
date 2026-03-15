@@ -431,8 +431,10 @@ function render() {
 async function load() {
   setStatus("Loading…");
   const res = await fetch("api/config.php", { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to load config");
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || "Failed to load config");
+  }
   if (!data || !Array.isArray(data.sectors)) throw new Error("Invalid config format");
   sectors = data.sectors;
   render();

@@ -86,12 +86,22 @@ async function seedDefaultSectors(conn) {
     if (total > 0) return;
 
     await conn.query(
-        "INSERT INTO wheel_sectors (position_order, label, color, text, weight) VALUES ?",
-        [[
-            [1, "Prize 1", "#FFBC03", "#FFFFFF", 1],
-            [2, "Prize 2", "#FF5A5F", "#FFFFFF", 1],
-        ]]
+        "INSERT INTO wheel_sectors (position_order, label, color, text, weight) VALUES (?, ?, ?, ?, ?)",
+        [1, "Prize 1", "#FFBC03", "#FFFFFF", 1]
     );
+
+    await conn.query(
+        "INSERT INTO wheel_sectors (position_order, label, color, text, weight) VALUES (?, ?, ?, ?, ?)",
+        [2, "Prize 2", "#FF5A5F", "#FFFFFF", 1]
+    );
+}
+
+function getConfigErrorMessage(error) {
+    if (error && typeof error.message === "string" && error.message.trim()) {
+        return error.message;
+    }
+
+    return "Internal server error";
 }
 
 module.exports = async function handler(req, res) {
@@ -149,6 +159,6 @@ module.exports = async function handler(req, res) {
             conn.release();
         }
     } catch (error) {
-        res.status(500).json({ error: error.message || "Internal server error" });
+        res.status(500).json({ error: getConfigErrorMessage(error) });
     }
 };

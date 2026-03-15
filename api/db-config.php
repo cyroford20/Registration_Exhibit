@@ -37,68 +37,40 @@ function parseMysqlUrl(string $url): array
 $dbUrl = envFirst(['DATABASE_URL', 'MYSQL_URL', 'JAWSDB_URL', 'CLEARDB_DATABASE_URL'], '');
 $urlCfg = $dbUrl !== '' ? parseMysqlUrl($dbUrl) : [];
 
-define('DB_HOST', envFirst(['DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'DB_SERVER', 'SQL_HOST'], $urlCfg['host'] ?? '127.0.0.1'));
-define('DB_USER', envFirst(['DB_USER', 'MYSQL_USER', 'MYSQLUSER', 'DB_USERNAME', 'SQL_USER'], $urlCfg['user'] ?? 'root'));
-define('DB_PASSWORD', envFirst(['DB_PASSWORD', 'MYSQL_PASSWORD', 'MYSQLPASSWORD', 'MYSQL_PASS', 'DB_PASS', 'SQL_PASSWORD'], $urlCfg['pass'] ?? ''));
-define('DB_NAME', envFirst(['DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'DB_DATABASE', 'SQL_DATABASE'], $urlCfg['name'] ?? 'sql12819977'));
-define('DB_PORT', (int)envFirst(['DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'SQL_PORT'], $urlCfg['port'] ?? '3306'));
-
-function databaseExists(mysqli $conn, string $dbName): bool
-{
-    $escaped = $conn->real_escape_string($dbName);
-    $result = $conn->query("SHOW DATABASES LIKE '{$escaped}'");
-    if (!$result) {
-        return false;
-    }
-
-    $exists = $result->num_rows > 0;
-    $result->free();
-    return $exists;
-}
+define('DB_HOST', envFirst(['DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'DB_SERVER', 'SQL_HOST'], $urlCfg['host'] ?? 'mysql-2325669c-z2e4r1o-8be1.f.aivencloud.com'));
+define('DB_USER', envFirst(['DB_USER', 'MYSQL_USER', 'MYSQLUSER', 'DB_USERNAME', 'SQL_USER'], $urlCfg['user'] ?? 'avnadmin'));
+define('DB_PASSWORD', envFirst(['DB_PASSWORD', 'MYSQL_PASSWORD', 'MYSQLPASSWORD', 'MYSQL_PASS', 'DB_PASS', 'SQL_PASSWORD'], $urlCfg['pass'] ?? 'CpPqnUb8b5'));
+define('DB_NAME', envFirst(['DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'DB_DATABASE', 'SQL_DATABASE'], $urlCfg['name'] ?? 'defaultdb'));
+define('DB_PORT', (int)envFirst(['DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'SQL_PORT'], $urlCfg['port'] ?? '18356'));
 
 // Create connection
 function getDBConnection()
 {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, '', DB_PORT);
-
-    // Check connection
-    if ($conn->connect_error) {
-        throw new RuntimeException('Database connection failed: ' . $conn->connect_error);
+    $conn = mysqli_init();
+    if (!$conn) {
+        throw new RuntimeException('Database initialization failed.');
     }
 
-    $candidates = array_values(array_unique([
+    // Aiven requires TLS/SSL for MySQL connections.
+    mysqli_ssl_set($conn, null, null, null, null, null);
+
+    $ok = mysqli_real_connect(
+        $conn,
+        DB_HOST,
+        DB_USER,
+        DB_PASSWORD,
         DB_NAME,
-        'sql12819977',
-        'cyber_spin_wheel',
-    ]));
+        DB_PORT,
+        null,
+        MYSQLI_CLIENT_SSL | MYSQLI_CLIENT_SSL_DONT_VERIFY_SERVER_CERT
+    );
 
-    $selectedDb = '';
-    foreach ($candidates as $candidate) {
-        if ($candidate !== '' && databaseExists($conn, $candidate)) {
-            $selectedDb = $candidate;
-            break;
-        }
-    }
-
-    // If configured DB doesn't exist, try creating it (works for local dev with permissions).
-    if ($selectedDb === '' && DB_NAME !== '') {
-        $escapedDb = str_replace('`', '``', DB_NAME);
-        $createSql = "CREATE DATABASE IF NOT EXISTS `{$escapedDb}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci";
-        if ($conn->query($createSql)) {
-            $selectedDb = DB_NAME;
-        }
-    }
-
-    if ($selectedDb === '') {
-        throw new RuntimeException('No usable database found. Set DB_NAME to an existing database.');
-    }
-
-    if (!$conn->select_db($selectedDb)) {
-        throw new RuntimeException('Failed to select database: ' . $conn->error);
+    if (!$ok) {
+        throw new RuntimeException('Database connection failed: ' . mysqli_connect_error());
     }
 
     // Set charset
-    $conn->set_charset("utf8mb4");
+    mysqli_set_charset($conn, 'utf8mb4');
     return $conn;
 }
 

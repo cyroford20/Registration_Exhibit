@@ -16,31 +16,28 @@ body {
   min-height: 100%;
 }
 
-background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d2847 100%);
-color: var(--text-primary);
-font-family: "Space Mono",
-monospace;
-
 body {
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d2847 100%);
+  color: var(--text-primary);
+  font-family: "Space Mono", monospace;
   display: block;
   min-height: 100vh;
   padding: 28px 20px 64px;
   overflow-x: hidden;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0d2847 100%);
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(0deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-    pointer-events: none;
-    z-index: 0;
-    animation: grid-move 20s linear infinite;
-  }
-
   overflow-y: auto;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(0deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+  z-index: 0;
+  animation: grid-move 20s linear infinite;
 }
 
 body::after {

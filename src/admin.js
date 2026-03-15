@@ -2,7 +2,6 @@ const rowsEl = document.querySelector("#rows");
 const statusEl = document.querySelector("#status");
 const addBtn = document.querySelector("#add");
 const saveBtn = document.querySelector("#save");
-const userPanelEl = document.querySelector("#userPanel");
 const sectorPanelEl = document.querySelector("#sectorPanel");
 const showUserPanelBtn = document.querySelector("#showUserPanel");
 const showSectorPanelBtn = document.querySelector("#showSectorPanel");
@@ -41,7 +40,14 @@ function setActivePanelButton(activeBtn) {
 }
 
 function showPanel(mode) {
-  if (!userPanelEl || !sectorPanelEl) return;
+  if (!sectorPanelEl) return;
+
+  const userPanelEl = document.querySelector("#userPanel");
+  if (!userPanelEl) {
+    sectorPanelEl.classList.remove("hidden-panel");
+    setActivePanelButton(showSectorPanelBtn || showAllPanelsBtn);
+    return;
+  }
 
   if (mode === "user") {
     userPanelEl.classList.remove("hidden-panel");
@@ -69,7 +75,6 @@ showAllPanelsBtn?.addEventListener("click", () => showPanel("all"));
 if (showUserPanelBtn || showSectorPanelBtn || showAllPanelsBtn) {
   showPanel("user");
 } else {
-  userPanelEl?.classList.remove("hidden-panel");
   sectorPanelEl?.classList.remove("hidden-panel");
 }
 
@@ -487,7 +492,7 @@ saveBtn.addEventListener("click", () => {
   save().catch((e) => setStatus(e.message || String(e)));
 });
 
-registerBtn.addEventListener("click", () => {
+registerBtn?.addEventListener("click", () => {
   registerUser();
 });
 
@@ -495,11 +500,11 @@ exportUsersExcelBtn?.addEventListener("click", () => {
   exportUsersToExcel();
 });
 
-userFullnameInput.addEventListener("keypress", (e) => {
+userFullnameInput?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") registerUser();
 });
 
-userEmailInput.addEventListener("keypress", (e) => {
+userEmailInput?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") registerUser();
 });
 

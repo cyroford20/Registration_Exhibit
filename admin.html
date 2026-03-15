@@ -18,7 +18,7 @@
     <header class="admin-hero">
       <p class="admin-kicker">⚙️ WHEEL CONFIGURATION</p>
       <h1>WHEEL CONFIGURATION</h1>
-      <p class="admin-intro">Tune each wheel sector, then update the registration list from the admin panel below.</p>
+      <p class="admin-intro">Tune each wheel sector and save the configuration for the main wheel page.</p>
     </header>
 
     <section id="sectorPanel" class="wheel-config-section panel-card panel-card-primary">
@@ -49,47 +49,6 @@
           </thead>
           <tbody id="rows"></tbody>
         </table>
-      </div>
-    </section>
-
-    <section id="userPanel" class="user-registration-section panel-card panel-card-secondary">
-      <div class="section-heading">
-        <h2>👥 USER REGISTRATION</h2>
-        <p class="section-copy">Add attendees manually and export the full user list when needed.</p>
-      </div>
-
-      <div class="registration-form">
-        <input type="text" id="userFullname" placeholder="Full Name" class="reg-input" />
-        <input type="email" id="userEmail" placeholder="Email Address" class="reg-input" />
-        <input type="text" id="userCollege" placeholder="College" class="reg-input" />
-        <select id="userGender" class="reg-select" title="Gender" aria-label="Gender">
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Others">Others</option>
-        </select>
-        <select id="userCampus" class="reg-select" title="Campus" aria-label="Campus">
-          <option value="">Select Campus</option>
-          <option value="MCC">MCC</option>
-          <option value="MMC">MMC</option>
-          <option value="MBC">MBC</option>
-        </select>
-        <select id="userRole" class="reg-select" title="Role" aria-label="Role">
-          <option value="">Select Role</option>
-          <option value="Student">Student</option>
-          <option value="Faculty">Faculty</option>
-          <option value="Non-Teaching">Non-Teaching</option>
-          <option value="Others">Others</option>
-        </select>
-        <button id="registerBtn" class="reg-button">Register User</button>
-        <a href="/qr-register.html" class="reg-button qr-reg-link">📱
-          QR Registration</a>
-      </div>
-
-      <div id="regStatus" class="status" aria-live="polite"></div>
-
-      <div class="registration-actions">
-        <button id="exportUsersExcel" class="reg-button" type="button">Export Users to Excel</button>
       </div>
     </section>
   </div>

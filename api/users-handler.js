@@ -5,10 +5,10 @@ let pool;
 function getPool() {
     if (!pool) {
         pool = mysql.createPool({
-            host: process.env.DB_HOST || 'mysql-2325669c-z2e4r1o-8be1.f.aivencloud.com',
-            user: process.env.DB_USER || 'avnadmin',
-            password: process.env.DB_PASSWORD || 'CpPqnUb8b5',
-            database: process.env.DB_NAME || 'defaultdb',
+            host: process.env.DB_HOST,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME,
             port: Number(process.env.DB_PORT || 18356),
             waitForConnections: true,
             connectionLimit: 5,

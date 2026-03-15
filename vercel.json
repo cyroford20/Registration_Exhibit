@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/config.php",
+            "destination": "/api/config"
+        }
+    ]
+}

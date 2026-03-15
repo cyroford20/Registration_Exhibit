@@ -2,14 +2,62 @@ const mysql = require("mysql2/promise");
 
 let pool;
 
+function firstNonEmptyEnv(keys) {
+    for (const key of keys) {
+        const value = process.env[key];
+        if (typeof value === "string" && value.trim() !== "") {
+            return value.trim();
+        }
+    }
+    return "";
+}
+
+function parseMysqlUrl(urlValue) {
+    if (!urlValue) return null;
+
+    try {
+        const u = new URL(urlValue);
+        return {
+            host: u.hostname || "",
+            user: decodeURIComponent(u.username || ""),
+            password: decodeURIComponent(u.password || ""),
+            database: (u.pathname || "").replace(/^\//, ""),
+            port: u.port ? Number(u.port) : undefined,
+        };
+    } catch {
+        return null;
+    }
+}
+
+function getDbConfig() {
+    const parsedUrl = parseMysqlUrl(
+        firstNonEmptyEnv(["MYSQL_URL", "DATABASE_URL", "AIVEN_MYSQL_URL", "SERVICE_URI"])
+    );
+
+    const host = firstNonEmptyEnv(["DB_HOST", "MYSQL_HOST", "MYSQLHOST"]) || parsedUrl?.host || "";
+    const user = firstNonEmptyEnv(["DB_USER", "MYSQL_USER", "MYSQLUSER", "DB_USERNAME"]) || parsedUrl?.user || "";
+    const password =
+        firstNonEmptyEnv(["DB_PASSWORD", "MYSQL_PASSWORD", "MYSQLPASS", "MYSQL_PASSWORD_PLAIN"]) || parsedUrl?.password || "";
+    const database = firstNonEmptyEnv(["DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE"]) || parsedUrl?.database || "";
+    const portRaw = firstNonEmptyEnv(["DB_PORT", "MYSQL_PORT", "MYSQLPORT"]);
+    const port = Number(portRaw || parsedUrl?.port || 18356);
+
+    if (!host || !user || !password || !database) {
+        throw new Error("Database credentials are missing. Set DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT (or MYSQL_URL) in Vercel environment variables.");
+    }
+
+    return { host, user, password, database, port };
+}
+
 function getPool() {
     if (!pool) {
+        const cfg = getDbConfig();
         pool = mysql.createPool({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-            port: Number(process.env.DB_PORT || 18356),
+            host: cfg.host,
+            user: cfg.user,
+            password: cfg.password,
+            database: cfg.database,
+            port: cfg.port,
             waitForConnections: true,
             connectionLimit: 5,
             queueLimit: 0,

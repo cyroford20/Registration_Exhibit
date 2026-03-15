@@ -6,7 +6,7 @@
         },
         {
             "source": "/api/users.php",
-            "destination": "/api/users"
+            "destination": "/api/users-handler"
         }
     ]
 }

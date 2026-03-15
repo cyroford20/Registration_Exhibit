@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/config.php",
-            "destination": "/api/config"
+            "destination": "/api/wheel-config"
         }
     ]
 }

@@ -427,6 +427,40 @@ function pickWeightedIndex() {
   return sectors.length - 1;
 }
 
+function wrapLabelLines(label, maxCharsPerLine = 12) {
+  const normalized = String(label || "")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\s*\n\s*/g, "\n")
+    .trim();
+
+  if (!normalized) return [""];
+
+  const lines = [];
+  const sourceLines = normalized.split("\n");
+
+  sourceLines.forEach((sourceLine) => {
+    const words = sourceLine.split(/\s+/).filter(Boolean);
+    if (!words.length) {
+      lines.push("");
+      return;
+    }
+
+    let currentLine = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const next = `${currentLine} ${words[i]}`;
+      if (next.length <= maxCharsPerLine) {
+        currentLine = next;
+      } else {
+        lines.push(currentLine);
+        currentLine = words[i];
+      }
+    }
+    lines.push(currentLine);
+  });
+
+  return lines;
+}
+
 function drawSector(sector, i) {
   const ang = arc * i;
   const r = rad();
@@ -448,8 +482,8 @@ function drawSector(sector, i) {
   ctx.fillStyle = sector.text;
   ctx.font = `bold ${fontSize}px 'Lato', sans-serif`;
 
-  // Handle multiline text
-  const lines = sector.label.split('\n');
+  // Handle multiline and long labels on narrow sectors.
+  const lines = wrapLabelLines(sector.label, 12);
   const lineHeight = fontSize * 1.2;
   const totalHeight = (lines.length - 1) * lineHeight;
   let y = 10 - totalHeight / 2;

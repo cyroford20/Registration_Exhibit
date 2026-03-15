@@ -269,7 +269,28 @@ button:hover,
   font-weight: 700;
 }
 
+.table textarea {
+  width: 100%;
+  min-height: 54px;
+  padding: 6px 8px;
+  border: 1px solid rgba(0, 217, 255, 0.22);
+  border-radius: 3px;
+  background: #f4f6f8;
+  color: #131928;
+  font-family: "Space Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  resize: vertical;
+  line-height: 1.3;
+}
+
 .table input:focus {
+  outline: none;
+  border-color: rgba(0, 217, 255, 0.75);
+  box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.18);
+}
+
+.table textarea:focus {
   outline: none;
   border-color: rgba(0, 217, 255, 0.75);
   box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.18);

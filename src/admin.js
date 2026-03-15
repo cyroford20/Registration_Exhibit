@@ -379,6 +379,16 @@ function createInput(value, type = "text", placeholder = "") {
   return input;
 }
 
+function createTextArea(value, placeholder = "") {
+  const textarea = document.createElement("textarea");
+  textarea.value = value ?? "";
+  textarea.rows = 2;
+  if (placeholder) {
+    textarea.placeholder = placeholder;
+  }
+  return textarea;
+}
+
 function render() {
   rowsEl.innerHTML = "";
 
@@ -386,7 +396,8 @@ function render() {
     const tr = document.createElement("tr");
 
     const labelTd = document.createElement("td");
-    const labelInput = createInput(sector.label, "text", "Sector label");
+    const labelInput = createTextArea(sector.label, "Sector label");
+    labelInput.className = "labelEditor";
     labelInput.addEventListener("input", () => (sectors[index].label = labelInput.value));
     labelTd.appendChild(labelInput);
 

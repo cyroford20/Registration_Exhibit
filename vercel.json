@@ -3,6 +3,10 @@
         {
             "source": "/api/config.php",
             "destination": "/api/wheel-config"
+        },
+        {
+            "source": "/api/users.php",
+            "destination": "/api/users"
         }
     ]
 }

@@ -37,7 +37,7 @@ function getDbConfig() {
     const host = firstNonEmptyEnv(["DB_HOST", "MYSQL_HOST", "MYSQLHOST"]) || parsedUrl?.host || "";
     const user = firstNonEmptyEnv(["DB_USER", "MYSQL_USER", "MYSQLUSER", "DB_USERNAME"]) || parsedUrl?.user || "";
     const password =
-        firstNonEmptyEnv(["DB_PASSWORD", "MYSQL_PASSWORD", "MYSQLPASS", "MYSQL_PASSWORD_PLAIN"]) || parsedUrl?.password || "";
+        firstNonEmptyEnv(["DB_PASSWORD", "DB_PASS", "MYSQL_PASSWORD", "MYSQLPASS", "MYSQL_PASSWORD_PLAIN"]) || parsedUrl?.password || "";
     const database = firstNonEmptyEnv(["DB_NAME", "MYSQL_DATABASE", "MYSQLDATABASE"]) || parsedUrl?.database || "";
     const portRaw = firstNonEmptyEnv(["DB_PORT", "MYSQL_PORT", "MYSQLPORT"]);
     const port = Number(portRaw || parsedUrl?.port || 18356);

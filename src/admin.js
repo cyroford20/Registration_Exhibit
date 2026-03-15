@@ -66,7 +66,12 @@ showUserPanelBtn?.addEventListener("click", () => showPanel("user"));
 showSectorPanelBtn?.addEventListener("click", () => showPanel("sector"));
 showAllPanelsBtn?.addEventListener("click", () => showPanel("all"));
 
-showPanel("user");
+if (showUserPanelBtn || showSectorPanelBtn || showAllPanelsBtn) {
+  showPanel("user");
+} else {
+  userPanelEl?.classList.remove("hidden-panel");
+  sectorPanelEl?.classList.remove("hidden-panel");
+}
 
 const usersRowsEl = document.querySelector("#usersRows");
 const regStatusEl = document.querySelector("#regStatus");
@@ -188,6 +193,7 @@ async function registerUser() {
 
     users = data.users || [];
     renderUsers();
+    setRegStatus("User registered successfully", "success");
     userFullnameInput.value = "";
     userEmailInput.value = "";
     userCollegeInput.value = "";

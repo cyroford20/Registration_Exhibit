@@ -17,10 +17,17 @@
   <div class="background-grid"></div>
 
   <!-- Registration Modal -->
-  <div id="registrationModal" class="registration-modal">
+  <div id="registrationModal" class="registration-modal hidden" aria-hidden="true">
     <div class="modal-content">
-      <h2>REGISTER TO SPIN</h2>
-      <p class="modal-subtitle">Enter your details to begin</p>
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">👥</span>
+          <div>
+            <h2>REGISTRATION</h2>
+          </div>
+        </div>
+        <button id="closeRegistrationModal" class="modal-close" type="button" aria-label="Close registration">×</button>
+      </div>
 
       <div class="modal-form">
         <input type="text" id="playerFullname" placeholder="Full Name" class="modal-input" autocomplete="name" />
@@ -45,7 +52,7 @@
           <option value="Non-Teaching">Non-Teaching</option>
           <option value="Others">Others</option>
         </select>
-        <button id="startBtn" class="modal-button">START SPINNING</button>
+        <button id="startBtn" class="modal-button" type="button">REGISTER USER</button>
       </div>
 
       <div id="playerRegStatus" class="status" aria-live="polite"></div>
@@ -57,7 +64,11 @@
       <h1 class="main-title">CYBER SPIN WHEEL</h1>
       <p class="subtitle">IT Exhibit Experience</p>
     </div>
-    <a class="admin-link" href="admin.html">⚙️ Admin</a>
+    <div class="header-actions">
+      <a class="header-action header-action-admin" href="admin.html">⚙️ Admin</a>
+      <button id="openRegistrationModal" class="header-action header-action-register" type="button">🪪
+        Registration</button>
+    </div>
   </header>
 
   <main class="main-content">

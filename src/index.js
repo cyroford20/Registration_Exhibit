@@ -8,7 +8,9 @@ const playerCampusSelect = document.querySelector("#playerCampus");
 const playerRoleSelect = document.querySelector("#playerRole");
 const startBtn = document.querySelector("#startBtn");
 const playerRegStatus = document.querySelector("#playerRegStatus");
-const adminLink = document.querySelector(".admin-link");
+const adminLink = document.querySelector(".header-action-admin");
+const openRegistrationModalBtn = document.querySelector("#openRegistrationModal");
+const closeRegistrationModalBtn = document.querySelector("#closeRegistrationModal");
 const queueListEl = document.querySelector("#queueList");
 const historyListEl = document.querySelector("#historyList");
 const spinResultToastEl = document.querySelector("#spinResultToast");
@@ -22,6 +24,15 @@ let spinResultToastTimer = null;
 const REQUIRE_REGISTRATION = false;
 const ADMIN_PASSWORD = "admin123";
 const ADMIN_SESSION_KEY = "adminAuthenticated";
+const DEFAULT_GUEST_PLAYER = {
+  fullname: "Guest",
+  email: "guest@local",
+  college: "N/A",
+  gender: "N/A",
+  campus: "N/A",
+  role: "Guest",
+};
+const REGISTER_BUTTON_LABEL = "REGISTER USER";
 
 if (adminLink) {
   adminLink.addEventListener("click", (e) => {
@@ -36,6 +47,55 @@ if (adminLink) {
       window.alert("Incorrect password");
     }
   });
+}
+
+function isGuestPlayer(player) {
+  return !player || String(player.email || "").toLowerCase() === DEFAULT_GUEST_PLAYER.email;
+}
+
+function setPlayerRegStatus(message, kind = "") {
+  if (!playerRegStatus) return;
+  playerRegStatus.textContent = message;
+  playerRegStatus.dataset.kind = kind;
+  playerRegStatus.style.opacity = message ? "1" : "0";
+}
+
+function syncRegistrationForm() {
+  if (!currentPlayer || isGuestPlayer(currentPlayer)) {
+    return;
+  }
+
+  playerFullnameInput.value = currentPlayer.fullname || "";
+  playerEmailInput.value = currentPlayer.email || "";
+  playerCollegeInput.value = currentPlayer.college || "";
+  playerGenderSelect.value = currentPlayer.gender || "";
+  playerCampusSelect.value = currentPlayer.campus || "";
+  playerRoleSelect.value = currentPlayer.role || "";
+}
+
+function openRegistrationModal() {
+  if (!registrationModal) return;
+  syncRegistrationForm();
+  setPlayerRegStatus("");
+  registrationModal.classList.remove("hidden");
+  registrationModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
+function closeRegistrationModal() {
+  if (!registrationModal) return;
+  if (REQUIRE_REGISTRATION && !currentPlayer) {
+    return;
+  }
+
+  registrationModal.classList.add("hidden");
+  registrationModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+}
+
+function resetRegistrationButton() {
+  startBtn.disabled = false;
+  startBtn.textContent = REGISTER_BUTTON_LABEL;
 }
 
 // Load registered users and check if current player is registered
@@ -196,16 +256,12 @@ async function handlePlayerStart() {
   const role = playerRoleSelect.value;
 
   if (!fullname || !email || !college || !gender || !campus || !role) {
-    playerRegStatus.textContent = "Please fill in all fields";
-    playerRegStatus.dataset.kind = "error";
-    playerRegStatus.style.opacity = "1";
+    setPlayerRegStatus("Please fill in all fields", "error");
     return;
   }
 
   if (!email.includes("@")) {
-    playerRegStatus.textContent = "Invalid email format";
-    playerRegStatus.dataset.kind = "error";
-    playerRegStatus.style.opacity = "1";
+    setPlayerRegStatus("Invalid email format", "error");
     return;
   }
 
@@ -216,11 +272,8 @@ async function handlePlayerStart() {
   const regResult = await registerPlayer(player);
 
   if (!regResult.ok) {
-    playerRegStatus.textContent = regResult.message;
-    playerRegStatus.dataset.kind = "error";
-    playerRegStatus.style.opacity = "1";
-    startBtn.disabled = false;
-    startBtn.textContent = "START SPINNING";
+    setPlayerRegStatus(regResult.message, "error");
+    resetRegistrationButton();
     return;
   }
 
@@ -228,36 +281,20 @@ async function handlePlayerStart() {
   currentPlayer = player;
   sessionStorage.setItem("currentPlayer", JSON.stringify(currentPlayer));
 
-  playerRegStatus.textContent = regResult.alreadyExists
-    ? "Welcome back! " + fullname
-    : "Registered! Welcome " + fullname;
-  playerRegStatus.dataset.kind = "success";
-  playerRegStatus.style.opacity = "1";
+  setPlayerRegStatus(
+    regResult.alreadyExists ? "Welcome back! " + fullname : "Registered! Welcome " + fullname,
+    "success"
+  );
 
   // Hide modal after a brief delay
   setTimeout(() => {
-    registrationModal.classList.add("hidden");
-    startBtn.disabled = false;
-    startBtn.textContent = "START SPINNING";
+    closeRegistrationModal();
+    resetRegistrationButton();
   }, 500);
 }
 
 // Initialize registration
 async function initRegistration() {
-  if (!REQUIRE_REGISTRATION) {
-    currentPlayer = {
-      fullname: "Guest",
-      email: "guest@local",
-      college: "N/A",
-      gender: "N/A",
-      campus: "N/A",
-      role: "Guest",
-    };
-    sessionStorage.setItem("currentPlayer", JSON.stringify(currentPlayer));
-    registrationModal.classList.add("hidden");
-    return;
-  }
-
   await loadRegisteredUsers();
 
   // Check if player is already in session
@@ -268,24 +305,52 @@ async function initRegistration() {
       registrationModal.classList.add("hidden");
     } catch (e) {
       sessionStorage.removeItem("currentPlayer");
-      registrationModal.classList.remove("hidden");
+      currentPlayer = null;
     }
-  } else {
-    registrationModal.classList.remove("hidden");
   }
 
-  // Event listeners
-  startBtn.addEventListener("click", handlePlayerStart);
-  playerFullnameInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") handlePlayerStart();
-  });
-  playerEmailInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") handlePlayerStart();
-  });
-  playerCollegeInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") handlePlayerStart();
-  });
+  if (!currentPlayer && !REQUIRE_REGISTRATION) {
+    currentPlayer = { ...DEFAULT_GUEST_PLAYER };
+    sessionStorage.setItem("currentPlayer", JSON.stringify(currentPlayer));
+  }
+
+  if (REQUIRE_REGISTRATION && !currentPlayer) {
+    openRegistrationModal();
+  } else {
+    closeRegistrationModal();
+  }
 }
+
+openRegistrationModalBtn?.addEventListener("click", () => {
+  openRegistrationModal();
+});
+
+closeRegistrationModalBtn?.addEventListener("click", () => {
+  closeRegistrationModal();
+});
+
+registrationModal?.addEventListener("click", (e) => {
+  if (e.target === registrationModal) {
+    closeRegistrationModal();
+  }
+});
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeRegistrationModal();
+  }
+});
+
+startBtn?.addEventListener("click", handlePlayerStart);
+playerFullnameInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") handlePlayerStart();
+});
+playerEmailInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") handlePlayerStart();
+});
+playerCollegeInput?.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") handlePlayerStart();
+});
 
 const defaultSectors = [
   { color: "#FFBC03", text: "#333333", label: "Sweets", weight: 1 },

@@ -15,18 +15,48 @@
 
 <body>
   <div class="admin">
-    <h1>⚙️ WHEEL CONFIGURATION</h1>
+    <header class="admin-hero">
+      <p class="admin-kicker">⚙️ WHEEL CONFIGURATION</p>
+      <h1>WHEEL CONFIGURATION</h1>
+      <p class="admin-intro">Tune each wheel sector, then update the registration list from the admin panel below.</p>
+    </header>
 
-    <div class="panel-switcher" aria-label="Admin panel switcher">
-      <button id="showUserPanel" class="panel-btn active" type="button">User Registration</button>
-      <button id="showSectorPanel" class="panel-btn" type="button">Sector Configuration</button>
-      <button id="showAllPanels" class="panel-btn" type="button">Show All</button>
-    </div>
+    <section id="sectorPanel" class="wheel-config-section panel-card panel-card-primary">
+      <div class="section-heading">
+        <h2>🎯 SECTOR CONFIGURATION</h2>
+        <p class="section-copy">Adjust sector labels, colors, text color, and weighted probability.</p>
+      </div>
 
-    <!-- USER REGISTRATION SECTION -->
-    <section id="userPanel" class="user-registration-section">
-      <h2>👥 USER REGISTRATION</h2>
-      <p class="muted">[ Register users before they can spin the wheel. ]</p>
+      <div class="actions">
+        <button id="add" type="button">Add Sector</button>
+        <button id="save" type="button">Save</button>
+        <a class="link" href="/">Back to wheel</a>
+      </div>
+
+      <div id="status" class="status" aria-live="polite"></div>
+
+      <div class="tableWrap">
+        <table class="table" aria-label="Wheel sectors">
+          <thead>
+            <tr>
+              <th>Label</th>
+              <th>Color</th>
+              <th>Text</th>
+              <th>Weight</th>
+              <th>Probability</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="userPanel" class="user-registration-section panel-card panel-card-secondary">
+      <div class="section-heading">
+        <h2>👥 USER REGISTRATION</h2>
+        <p class="section-copy">Add attendees manually and export the full user list when needed.</p>
+      </div>
 
       <div class="registration-form">
         <input type="text" id="userFullname" placeholder="Full Name" class="reg-input" />
@@ -60,35 +90,6 @@
 
       <div class="registration-actions">
         <button id="exportUsersExcel" class="reg-button" type="button">Export Users to Excel</button>
-      </div>
-    </section>
-
-    <!-- WHEEL CONFIGURATION SECTION -->
-    <section id="sectorPanel" class="wheel-config-section">
-      <h2>🎡 SECTOR CONFIGURATION</h2>
-
-      <div class="actions">
-        <button id="add">Add sector</button>
-        <button id="save">Save</button>
-        <a class="link" href="/">Back to wheel</a>
-      </div>
-
-      <div id="status" class="status" aria-live="polite"></div>
-
-      <div class="tableWrap">
-        <table class="table" aria-label="Wheel sectors">
-          <thead>
-            <tr>
-              <th>Label</th>
-              <th>Color</th>
-              <th>Text</th>
-              <th>Weight</th>
-              <th>Probability</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
       </div>
     </section>
   </div>

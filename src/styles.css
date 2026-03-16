@@ -143,6 +143,68 @@ header {
   text-shadow: 0 0 10px rgba(0, 217, 255, 0.45);
 }
 
+.developer-marquee {
+  position: relative;
+  z-index: 12;
+  width: min(96vw, 1200px);
+  overflow: hidden;
+  margin: -8px auto 16px;
+  min-height: 30px;
+}
+
+.developer-marquee-track {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 5px 14px;
+  border: 1px solid rgba(0, 217, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(12, 30, 60, 0.58);
+  color: rgba(203, 236, 255, 0.95);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgba(0, 217, 255, 0.24);
+  animation: marquee-center-right 16s linear infinite;
+}
+
+.developer-marquee-track span {
+  position: relative;
+}
+
+.developer-marquee-track span:not(:last-child)::after {
+  content: "•";
+  color: rgba(0, 245, 255, 0.78);
+  margin-left: 16px;
+}
+
+.developer-marquee-title {
+  color: #00ff88;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+@keyframes marquee-center-right {
+  0% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(-50%);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(120%);
+    opacity: 1;
+  }
+}
+
 .header-actions {
   position: fixed;
   top: 20px;
@@ -559,6 +621,22 @@ footer {
   .main-title {
     font-size: clamp(1.5rem, 8vw, 2.5rem);
     letter-spacing: 1px;
+  }
+
+  .developer-marquee {
+    width: min(94vw, 560px);
+    margin-top: -2px;
+    margin-bottom: 12px;
+  }
+
+  .developer-marquee-track {
+    font-size: 0.72rem;
+    gap: 12px;
+    padding: 5px 10px;
+  }
+
+  .developer-marquee-track span:not(:last-child)::after {
+    margin-left: 12px;
   }
 
   #spin_the_wheel {
